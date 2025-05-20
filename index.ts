@@ -2,6 +2,7 @@ import express from 'express';
 import loglevel, { LogLevelDesc } from 'loglevel';
 import { ApplicationEnvironment } from './app-environments';
 import bodyParser from 'body-parser';
+import { CrossDomainRelay } from './src/service/relay-cross-domain';
 
 const app = express();
 
@@ -22,8 +23,9 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.post('/form-submit', (req, res) => {
+app.post('/form-submit', async (req, res) => {
   loglevel.info('/form-submit');
+  await new CrossDomainRelay().connect();
   res.send('ok');
 });
 

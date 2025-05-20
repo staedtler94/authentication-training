@@ -2,6 +2,7 @@ import express from 'express';
 import loglevel, { LogLevelDesc } from 'loglevel';
 import { ApplicationEnvironment } from './app-environments';
 import jwt from 'jsonwebtoken';
+import { CrossDomainRelay } from './src/service/relay-cross-domain';
 const path = require('path');
 const app = express();
 new ApplicationEnvironment();
@@ -23,13 +24,19 @@ app.get('/saml', (req, res) => {
     audience: 'sp-saml',
     issuer: 'sp-server'
   };
-  const token = jwt.sign(cookievalues, ApplicationEnvironment.SERVICE_ENV_STROE.SERVICE_JWT, options)
+  const token = jwt.sign(cookievalues, ApplicationEnvironment.SERVICE_ENV_STROE.SERVICE_JWT, options);
   res.cookie('sp', token).sendFile(path.join(__dirname, '/public-service/index.html'));
 });
 
 app.post('/saml', (req, res) => {
   loglevel.info('Reached POST /saml');
+  new CrossDomainRelay().connect();
   res.status(200).send();
+});
+
+app.get('/info', (req, res)=>{
+  loglevel.info('Reached the info route.');
+  res.send('Info to send');
 });
 
 app.get('*', (req, res) => {
